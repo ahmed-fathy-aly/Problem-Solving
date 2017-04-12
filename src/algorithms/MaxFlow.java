@@ -11,17 +11,19 @@ public class MaxFlow {
     private int n, src, dest;
     private int[][] c;
     private int[] prev;
+    private List<Integer> edges[];
 
-    public int getMaxFlow(int[][] capacity, int src, int dest) {
+    public long getMaxFlow(List<Integer> edges[], int[][] capacity, int src, int dest) {
         this.n = capacity.length;
         this.src = src;
         this.dest = dest;
         this.c = capacity;
         this.prev = new int[n];
+        this.edges = edges;
 
-        int totalFlow = 0;
+        long totalFlow = 0;
         while (true) {
-            int addedFlow = removeFlowDfs();
+            long addedFlow = removeFlowDfs();
             if (addedFlow == 0)
                 break;
             totalFlow += addedFlow;
@@ -29,46 +31,10 @@ public class MaxFlow {
         return totalFlow;
     }
 
-    private int removeFlowMaxCapcity() {
-        int[] dist = new int[n];
-        Arrays.fill(dist, -1);
-        TreeSet<Integer> pq = new TreeSet<>((o1, o2) -> Integer.compare(o2, o1));
-        pq.add(src);
-        dist[src] = Integer.MAX_VALUE;
-
-        while (!pq.isEmpty()) {
-            int node = pq.pollFirst();
-            for (int next = 0; next < n; next++) {
-                int thisCapacity = Math.min(dist[node], c[node][next]);
-                if (thisCapacity > dist[next]) {
-                    pq.remove(next);
-                    dist[next] = thisCapacity;
-                    prev[next] = node;
-                    pq.add(next);
-                }
-            }
-        }
-
-        // if we didn't find dest then there's no path
-        if (prev[dest] == -1)
-            return 0;
-
-        // remove the flow and add reverse edges
-        int curr = dest;
-        int minFlow = dist[dest];
-        while (curr != src) {
-            c[prev[curr]][curr] -= minFlow;
-            c[curr][prev[curr]] += minFlow;
-            curr = prev[curr];
-        }
-
-        return minFlow;
-    }
-
-    private int removeFlowDfs() {
+    private long removeFlowDfs() {
         Arrays.fill(prev, -1);
         prev[src] = -2;
-        int minFlow = dfs(src);
+        long minFlow = dfs(src);
 
         // if we didn't find dest then there's no path
         if (prev[dest] == -1)
@@ -85,12 +51,12 @@ public class MaxFlow {
         return minFlow;
     }
 
-    private int dfs(int node) {
+    private long dfs(int node) {
         if (node == dest)
-            return Integer.MAX_VALUE;
+            return Long.MAX_VALUE;
 
-        int max = 0;
-        for (int next = 0; next < n; next++)
+        long max = 0;
+        for (int next : edges[node])
             if (prev[next] == -1 && c[node][next] > 0) {
                 prev[next] = node;
                 max = Math.max(max, Math.min(c[node][next], dfs(next)));
@@ -100,25 +66,35 @@ public class MaxFlow {
 
 }
 
+
 class StressTest {
 
     public static void main(String... args) {
         Random random = new Random();
-        int nNodes = 100;
+        int nNodes = 1000;
+        int nEdges = 1000;
         int maxCapacity = 1000;
-        int nCases = 100;
+        int nCases = 20;
         int[][] cap = new int[nNodes][nNodes];
-
+        List<Integer> edges[] = new List[nNodes];
+        for (int i = 0; i < nNodes; i++)
+            edges[i] = new ArrayList<>();
         long t1 = System.currentTimeMillis();
 
         for (int k = 0; k < nCases; k++) {
             System.out.println(k);
 
-            for (int r = 0; r < nNodes; r++)
-                for (int c = 0; c < nNodes; c++)
-                    cap[r][c] = random.nextInt(maxCapacity);
+            for (int i = 0; i < nEdges; i++){
+                int from = random.nextInt(nNodes);
+                int to = random.nextInt(nNodes);
+                int capacity = random.nextInt(maxCapacity);
+                edges[to].add(from);
+                edges[from].add(to);
+                cap[from][to] = capacity;
+            }
+
             MaxFlow flow = new MaxFlow();
-            flow.getMaxFlow(cap, 0, nNodes - 1);
+            flow.getMaxFlow(edges, cap, 0, nNodes - 1);
         }
         long t2 = System.currentTimeMillis();
         long time = t2 - t1;
