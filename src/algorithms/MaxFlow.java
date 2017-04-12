@@ -6,7 +6,6 @@ import java.util.*;
  * Complexity O(flow * n * n)
  * Gets the maximum flow between two nodes
  * uses path augmentation, where each new path is augmented with a dfs
- * 
  */
 public class MaxFlow {
     private int n, src, dest;
@@ -22,7 +21,7 @@ public class MaxFlow {
 
         int totalFlow = 0;
         while (true) {
-            int addedFlow = removeFlow();
+            int addedFlow = removeFlowDfs();
             if (addedFlow == 0)
                 break;
             totalFlow += addedFlow;
@@ -30,7 +29,43 @@ public class MaxFlow {
         return totalFlow;
     }
 
-    private int removeFlow() {
+    private int removeFlowMaxCapcity() {
+        int[] dist = new int[n];
+        Arrays.fill(dist, -1);
+        TreeSet<Integer> pq = new TreeSet<>((o1, o2) -> Integer.compare(o2, o1));
+        pq.add(src);
+        dist[src] = Integer.MAX_VALUE;
+
+        while (!pq.isEmpty()) {
+            int node = pq.pollFirst();
+            for (int next = 0; next < n; next++) {
+                int thisCapacity = Math.min(dist[node], c[node][next]);
+                if (thisCapacity > dist[next]) {
+                    pq.remove(next);
+                    dist[next] = thisCapacity;
+                    prev[next] = node;
+                    pq.add(next);
+                }
+            }
+        }
+
+        // if we didn't find dest then there's no path
+        if (prev[dest] == -1)
+            return 0;
+
+        // remove the flow and add reverse edges
+        int curr = dest;
+        int minFlow = dist[dest];
+        while (curr != src) {
+            c[prev[curr]][curr] -= minFlow;
+            c[curr][prev[curr]] += minFlow;
+            curr = prev[curr];
+        }
+
+        return minFlow;
+    }
+
+    private int removeFlowDfs() {
         Arrays.fill(prev, -1);
         prev[src] = -2;
         int minFlow = dfs(src);
@@ -65,12 +100,12 @@ public class MaxFlow {
 
 }
 
-class StressTest{
+class StressTest {
 
     public static void main(String... args) {
         Random random = new Random();
         int nNodes = 100;
-        int maxCapacity = 100;
+        int maxCapacity = 1000;
         int nCases = 100;
         int[][] cap = new int[nNodes][nNodes];
 
