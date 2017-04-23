@@ -1,6 +1,8 @@
-package algorithms;
+package data_structures;
 
 import static org.junit.Assert.*;
+
+import data_structures.UnionFind;
 import org.junit.Test;
 
 import java.util.*;
