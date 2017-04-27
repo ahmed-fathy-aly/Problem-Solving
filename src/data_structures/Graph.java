@@ -1,9 +1,11 @@
 package data_structures;
 
+
 import java.util.*;
 
 /**
  * adjacency list representation of the graph
+ * the nodes are zero-indexed
  */
 public class Graph {
     int n;
@@ -61,6 +63,34 @@ public class Graph {
         return strb.toString();
     }
 
+    /**
+     * @return shortest distance to other node and MAX for unreachable nodes or Double.MAX_VALUE for unreachable nodes
+     */
+    public double[] disjktra(int startNode) {
+        final double dist[] = new double[n];
+        Arrays.fill(dist, Double.MAX_VALUE);
+        dist[startNode] = 0;
+        TreeSet<Integer> pq = new TreeSet<>((l, r) -> {
+            if (dist[l] == dist[r])
+                return Integer.compare(l, r);
+            else
+                return Double.compare(dist[l], dist[r]);
+        });
+
+        pq.add(startNode);
+        while (pq.size() > 0) {
+            int node = pq.pollFirst();
+            for (Edge nextEdge : edges[node])
+                if (dist[node] + nextEdge.weight < dist[nextEdge.dest]) {
+                    pq.remove(nextEdge.dest);
+                    dist[nextEdge.dest] = dist[node] + nextEdge.weight;
+                    pq.add(nextEdge.dest);
+                }
+        }
+
+        return dist;
+    }
+
     class Edge {
         int source, dest;
         double weight;
@@ -71,5 +101,5 @@ public class Graph {
             this.weight = weight;
         }
     }
-
 }
+
