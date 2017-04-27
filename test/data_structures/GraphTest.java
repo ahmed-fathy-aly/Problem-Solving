@@ -68,6 +68,43 @@ public class GraphTest {
     }
 
     @Test
+    public void testEquals1(){
+        Graph first = new Graph(5);
+        Graph second = new Graph(5);
+        first.addUnDirectedEdge(1, 4, 4);
+        first.addUnDirectedEdge(2, 3, 3);
+        second.addUnDirectedEdge(3, 2, 3);
+        second.addUnDirectedEdge(4, 1, 4);
+
+        assertTrue(first.equals(second));
+    }
+
+
+    @Test
+    public void testEquals2(){
+        Graph first = new Graph(5);
+        Graph second = new Graph(5);
+        first.addUnDirectedEdge(1, 4, 4);
+        first.addUnDirectedEdge(2, 3, 3);
+        second.addDirectedEdge(3, 2, 3);
+        second.addDirectedEdge(2, 3, 3);
+        second.addUnDirectedEdge(4, 1, 4);
+
+        assertTrue(first.equals(second));
+    }
+
+
+    @Test
+    public void testEquals3(){
+        Graph first = new Graph(5);
+        Graph second = new Graph(3);;
+        first.addDirectedEdge(2, 3, 3);
+        second.addDirectedEdge(2, 3, 3);
+
+        assertFalse(first.equals(second));
+    }
+
+    @Test
     public void testDijkstra1(){
         Graph graph = new Graph(6);
         graph.addUnDirectedEdge(0, 1, 1);
@@ -108,4 +145,24 @@ public class GraphTest {
 
         assertArrayEquals(new double[]{Double.MAX_VALUE, 0, 24, 3, 15}, graph.disjktra(1), 0.1);
     }
+
+    @Test
+    public void testMST(){
+        Graph graph = new Graph(5);
+        graph.addUnDirectedEdge(0, 1, 3);
+        graph.addUnDirectedEdge(0, 2, 4);
+        graph.addUnDirectedEdge(3, 1, 6);
+        graph.addUnDirectedEdge(4, 1, 2);
+        graph.addUnDirectedEdge(1, 2, 5);
+        graph.addUnDirectedEdge(2, 4, 7);
+
+        Graph result = graph.getMST();
+        Graph expected = new Graph(5);
+        expected.addUnDirectedEdge(0, 1, 3);
+        expected.addUnDirectedEdge(1,4, 2);
+        expected.addUnDirectedEdge(0, 2, 4);
+        expected.addUnDirectedEdge(1,3, 6);
+        assertTrue(result.equals(expected));
+    }
+
 }
